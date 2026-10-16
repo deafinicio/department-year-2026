@@ -23,7 +23,7 @@ function card(ctx,w,h,{title='2026',subtitle='ДЕМОНСТРАЦІЙНИЙ М�
  ctx.fillStyle='#0b1425';ctx.fillRect(0,0,w,h);ctx.strokeStyle=color;ctx.lineWidth=3;ctx.strokeRect(22,22,w-44,h-44);
  ctx.fillStyle=color+'16';ctx.fillRect(45,45,w-90,h*.62);
  if(kind==='person'){
-  const skin=['#9ac4d1','#b6a9d0','#d1a4bd','#aad0be'][person];ctx.fillStyle=color+'66';ctx.beginPath();ctx.ellipse(w*.5,h*.62,w*.30,h*.17,0,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle=skin;ctx.beginPath();ctx.ellipse(w*.5,h*.30,w*.12,h*.12,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#223348';ctx.beginPath();ctx.ellipse(w*.5,h*.22,w*.13,h*.055,0,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle=color;ctx.fillRect(w*.35,h*.53,w*.30,7);
+  const skin=['#9ac4d1','#b6a9d0','#d1a4bd','#aad0be'][person%4];ctx.fillStyle=color+'66';ctx.beginPath();ctx.ellipse(w*.5,h*.62,w*.30,h*.17,0,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle=skin;ctx.beginPath();ctx.ellipse(w*.5,h*.30,w*.12,h*.12,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#223348';ctx.beginPath();ctx.ellipse(w*.5,h*.22,w*.13,h*.055,0,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle=color;ctx.fillRect(w*.35,h*.53,w*.30,7);
  }else if(kind==='building'){
   ctx.fillStyle='#213c4e';ctx.fillRect(w*.18,h*.28,w*.64,h*.29);ctx.strokeStyle=color;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(w*.12,h*.28);ctx.lineTo(w*.5,h*.13);ctx.lineTo(w*.88,h*.28);ctx.stroke();for(let i=0;i<3;i++){ctx.fillStyle=color+'77';ctx.fillRect(w*(.26+i*.18),h*.34,w*.10,h*.12);}
  }else if(kind==='chart'){
@@ -37,7 +37,7 @@ function glowTexture(){return texture((ctx,w,h)=>{const g=ctx.createRadialGradie
 export function createYearScene(container,{onOpen,onReady,onError}){
  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
- renderer.domElement.setAttribute('role','img');renderer.domElement.setAttribute('aria-label','Темна неонова платформа з дев’ятьма інтерактивними елементами');container.append(renderer.domElement);
+ renderer.domElement.setAttribute('role','img');renderer.domElement.setAttribute('aria-label','Темна неонова платформа з десятьма інтерактивними елементами');container.append(renderer.domElement);
  const scene=new THREE.Scene();scene.background=new THREE.Color(0x060b16);scene.fog=new THREE.Fog(0x060b16,65,155);
  const camera=new THREE.PerspectiveCamera(37,1,.1,220);camera.position.set(31,29,39);const look=new THREE.Vector3(0,.7,0),camBase=camera.position.clone();
  scene.add(new THREE.HemisphereLight(0x86b5ff,0x12162a,1.8));
@@ -65,7 +65,7 @@ export function createYearScene(container,{onOpen,onReady,onError}){
  elements.forEach((e,i)=>{
   const g=podium(e,i);
   if(e.id==='people'){
-   team.forEach((p,k)=>{const x=(k-1.5)*.94;box(g,.035,.45,.035,x,.56,0,0x34516a);const photo=plaque(g,(ctx,w,h)=>card(ctx,w,h,{title:p.name,subtitle:'ІЛЮСТРАТИВНИЙ ПОРТРЕТ',color:p.color,kind:'person',person:k}),{x,y:1.57,z:k%2?-.15:.12,w:.80,h:1.68,angle:(k-1.5)*-.075,color:p.color});photo.group.userData.person=k;});
+   team.forEach((p,k)=>{const col=k%4,row=Math.floor(k/4),x=(col-1.5)*1.02,y=1.04+row*1.28;const photo=plaque(g,(ctx,w,h)=>card(ctx,w,h,{title:p.role==='Координатор'?'КООРДИНАТОР':p.cohort==='new'?'НОВИЙ ІНСТРУКТОР':p.cohort==='former'?'ПОПЕРЕДНІЙ СКЛАД':'ІНСТРУКТОР',subtitle:p.cohort==='new'?'ВЕРЕСЕНЬ–ЛИСТОПАД':p.cohort==='former'?'СЕРПЕНЬ–ВЕРЕСЕНЬ':'БАЗОВИЙ СКЛАД',color:p.color,kind:'person',person:k}),{x,y,z:0,w:.86,h:1.15,angle:0,color:p.color});photo.group.userData.person=k;});
   }else if(e.id==='learning'){
    plaque(g,(ctx,w,h)=>card(ctx,w,h,{title:'ПІДГОТОВКА',color:e.accent}),{x:-.7,y:1.52,z:-.1,w:1.8,h:2.25,angle:.12,color:e.accent});
    for(let k=0;k<5;k++)box(g,1.45,.11,1.2,.9,.43+k*.12,.35,k%2?0x263153:0x18243b);
@@ -83,6 +83,11 @@ export function createYearScene(container,{onOpen,onReady,onError}){
    const arc=new THREE.CatmullRomCurve3([new THREE.Vector3(-1.4,1.9,-.3),new THREE.Vector3(0,2.6,-.3),new THREE.Vector3(1.4,1.9,-.3)]);mesh(new THREE.TubeGeometry(arc,32,.025,7,false),neon(e.accent),g);
   }else if(e.id==='resources'){
    plaque(g,(ctx,w,h)=>card(ctx,w,h,{title:'ІНСТРУМЕНТИ',color:e.accent,kind:'chart'}),{x:0,y:1.5,z:-.3,w:2.65,h:1.7,color:e.accent});box(g,2.7,.10,1.3,0,.42,.2,0x21324d);outline(g,2.75,.10,1.35,[0,.43,.2],e.accent);
+  }else if(e.id==='digital-space'){
+   box(g,3.4,2.2,.12,0,1.46,-1.12,0x172b42);outline(g,3.43,2.23,.14,[0,1.46,-1.12],e.accent);
+   box(g,.12,2.2,2.15,-1.66,1.46,-.10,0x142338);outline(g,.14,2.23,2.17,[-1.66,1.46,-.10],e.accent);
+   plaque(g,(ctx,w,h)=>card(ctx,w,h,{title:'ЦИФРОВИЙ ПРОСТІР',color:e.accent,kind:'chart'}),{x:0,y:1.72,z:-1.035,w:2.45,h:1.23,color:e.accent});
+   [-.77,.77].forEach(x=>{box(g,1.15,.09,.65,x,.92,.35,0x294059);box(g,.07,.53,.07,x-.4,.61,.35,0x23405b);box(g,.07,.53,.07,x+.4,.61,.35,0x23405b);box(g,.5,.1,.48,x,.63,1.05,0x354158);box(g,.5,.48,.07,x,.91,1.26,0x26384d);});
   }else if(e.id==='partners'){
    [-.65,.65].forEach((x,k)=>{const torus=mesh(new THREE.TorusGeometry(.8,.12,12,50),mat(0x503669,{emissive:k?0x3043b0:0x7c2db0,emissiveIntensity:.65,metalness:.65}),g,[x,1.45,0]);torus.rotation.y=k?.30:-.30;});label(g,'ВЗАЄМОДІЯ',0,.37,.85,2.5,.25,e.accent);
   }else if(e.id==='statistics'){

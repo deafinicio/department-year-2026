@@ -10,18 +10,18 @@ const pointOf=el=>{const r=el.getBoundingClientRect();return [r.left+r.width/2,r
 function openCurrent(){if(index<1||index>elements.length)return;inspector.openElement(elements[index-1].id,scene?.origin(index)||pointOf($('open-section')));}
 function update(){
  const c=chapters[index],count=visibleLayers(index);document.documentElement.style.setProperty('--active',c.accent);
- $('eyebrow').textContent=index===0?'2026 / ДЕВ’ЯТЬ СКЛАДОВИХ':index===FINAL_INDEX?'10 / ЦІЛІСНА КОМПОЗИЦІЯ':c.eyebrow;
+ $('eyebrow').textContent=index===0?`2026 / ${elements.length} СКЛАДОВИХ`:index===FINAL_INDEX?`${String(FINAL_INDEX).padStart(2,'0')} / ЦІЛІСНА КОМПОЗИЦІЯ`:c.eyebrow;
  const em=document.createElement('em');em.textContent=c.title[1];$('title').replaceChildren(document.createTextNode(c.title[0]),document.createElement('br'),em);$('description').textContent=c.description;
- $('layer-count').textContent=String(count).padStart(2,'0');$('layer-caption').textContent=count===elements.length?'Усі дев’ять складових на платформі':count?elements[count-1].name:'Початок історії';$('step-counter').textContent=`${String(index).padStart(2,'0')} / 10`;
+ $('layer-count').textContent=String(count).padStart(2,'0');$('layer-caption').textContent=count===elements.length?`Усі ${elements.length} складових на платформі`:count?elements[count-1].name:'Початок історії';$('step-counter').textContent=`${String(index).padStart(2,'0')} / ${String(FINAL_INDEX).padStart(2,'0')}`;
  $('layer-indicator').querySelectorAll('i').forEach((el,i)=>el.classList.toggle('on',i<count));
  $('chapters').querySelectorAll('button').forEach((el,i)=>{el.classList.toggle('active',i===index);el.classList.toggle('passed',i<=index&&index>0);if(i===index)el.setAttribute('aria-current','step');else el.removeAttribute('aria-current');});
- $('next-label').textContent=index===FINAL_INDEX?'Скласти ще раз':index===elements.length?'Побачити весь рік':'Додати '+['команду','підготовку','сесії','мапу','громади','інструменти','партнерство','історії','статистику'][index];
+ $('next-label').textContent=index===FINAL_INDEX?'Скласти ще раз':index===elements.length?'Побачити весь рік':elements[index].addLabel;
  $('open-section').hidden=index===0||index===FINAL_INDEX;$('previous').disabled=index===0;$('overview').disabled=index===0;$('catalog').disabled=count===0;
  $('overview').setAttribute('aria-pressed','false');$('scene-caption').textContent=index===0?'Додавайте елементи. Натискайте, щоб відкрити історії.':index===FINAL_INDEX?'Усі об’єкти клікабельні. Оберіть історію.':'Натисніть на об’єкт, щоб відкрити деталі.';
  $('quick-actions').replaceChildren();
- if(index===1)team.forEach((p,i)=>{const b=document.createElement('button');b.textContent=p.name;b.addEventListener('click',()=>inspector.openPerson(i,scene?.origin(1)||pointOf(b)));$('quick-actions').append(b);});
+ if(index===1){const b=document.createElement('button');b.textContent='Уся команда · '+team.length+' профілів';b.addEventListener('click',()=>inspector.openElement('people',scene?.origin(1)||pointOf(b)));$('quick-actions').append(b);}
  if(index===4)for(const name of ['A','Б','В']){const b=document.createElement('button');b.textContent='Точка '+name;b.addEventListener('click',()=>inspector.openElement('geography',scene?.origin(4)||pointOf(b),name));$('quick-actions').append(b);}
- $('announcement').textContent=`${count} із дев’яти елементів додано. ${c.name}.`;
+ $('announcement').textContent=`${count} із ${elements.length} елементів додано. ${c.name}.`;
  narrative.classList.remove('changing');requestAnimationFrame(()=>narrative.classList.add('changing'));
 }
 function go(next,{automated=false,instant=false,hash=true}={}){if(!automated)stopAuto();index=Math.max(0,Math.min(FINAL_INDEX,next));showingOverview=false;const c=chapters[index];scene?.setChapter(index,c.camera,c.look,{instant});update();if(hash)history.replaceState(null,'','#'+c.id);if(index===FINAL_INDEX)stopAuto();}
