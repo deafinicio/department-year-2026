@@ -26,6 +26,8 @@ jobs:
           done
       - name: Check local assets
         run: python3 scripts/check-site.py
+      - name: Check presentation content
+        run: node scripts/check-content.mjs
 
   deploy:
     needs: validate

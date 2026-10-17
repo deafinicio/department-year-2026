@@ -8,9 +8,9 @@ const neon=color=>new THREE.MeshBasicMaterial({color,toneMapped:false});
 function mesh(geometry,material,parent,p=[0,0,0]){const m=new THREE.Mesh(geometry,material);m.position.set(...p);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
 function box(parent,w,h,d,x,y,z,color=0x101d32){return mesh(new THREE.BoxGeometry(w,h,d),mat(color),parent,[x,y,z]);}
 function texture(draw,w=768,h=1024){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;return t;}
-function text(ctx,value,x,y,size=30,color='#c0e6ff',font='Arial',align='left'){ctx.fillStyle=color;ctx.font=`${size}px ${font}`;ctx.textAlign=align;ctx.fillText(value,x,y);}
+function text(ctx,value,x,y,size=30,color='#c0e6ff',font='Rubik',align='left'){ctx.fillStyle=color;ctx.font=`${size}px ${font}`;ctx.textAlign=align;ctx.fillText(value,x,y);}
 function label(parent,value,x,y,z,w=3.8,h=.28,color='#82b6cf'){
- const t=texture((ctx,cw,ch)=>{ctx.clearRect(0,0,cw,ch);text(ctx,value,cw/2,ch*.65,Math.min(57,cw/(value.length*.58)),color,'Arial','center');},1024,150);
+ const t=texture((ctx,cw,ch)=>{ctx.clearRect(0,0,cw,ch);text(ctx,value,cw/2,ch*.65,Math.min(57,cw/(value.length*.58)),color,'Rubik','center');},1024,150);
  const m=mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false,toneMapped:false,side:THREE.DoubleSide}),parent,[x,y,z]);m.rotation.x=-Math.PI/2;m.castShadow=false;m.userData.decoration=true;return m;
 }
 function outline(parent,w,h,d,p,color){const l=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w,h,d)),new THREE.LineBasicMaterial({color,toneMapped:false,transparent:true,opacity:.8}));l.position.set(...p);parent.add(l);return l;}
@@ -19,7 +19,7 @@ function plaque(parent,draw,{x=0,y=1.4,z=0,w=1.5,h=2,angle=0,color='#5be7ff'}={}
  box(g,w+.07,h+.07,.12,0,0,-.07,0x0b1425);outline(g,w+.075,h+.075,.13,[0,0,-.065],color);
  const face=mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshStandardMaterial({map:texture(draw),roughness:.65,emissive:0x46617b,emissiveIntensity:.35}),g,[0,0,.002]);face.castShadow=false;return {group:g,face};
 }
-function card(ctx,w,h,{title='2026',subtitle='ДЕМОНСТРАЦІЙНИЙ МАТЕРІАЛ',color='#5be7ff',kind='lines',person=0}={}){
+function card(ctx,w,h,{title='2026',subtitle='ВІДДІЛ ПРОТИМІННОЇ ДІЯЛЬНОСТІ',color='#5be7ff',kind='lines',person=0}={}){
  ctx.fillStyle='#0b1425';ctx.fillRect(0,0,w,h);ctx.strokeStyle=color;ctx.lineWidth=3;ctx.strokeRect(22,22,w-44,h-44);
  ctx.fillStyle=color+'16';ctx.fillRect(45,45,w-90,h*.62);
  if(kind==='person'){
@@ -31,13 +31,13 @@ function card(ctx,w,h,{title='2026',subtitle='ДЕМОНСТРАЦІЙНИЙ М�
  }else{
   ctx.strokeStyle=color+'99';ctx.lineWidth=4;for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(85,180+i*85);ctx.lineTo(w*(i%2?.71:.86),180+i*85);ctx.stroke();}ctx.fillStyle=color;ctx.fillRect(85,120,80,9);
  }
- text(ctx,title,w/2,h*.76,Math.min(51,650/(title.length*.58)),color,'Arial','center');text(ctx,subtitle,w/2,h*.84,20,'#6c8da5','Arial','center');text(ctx,'2026 / КОНЦЕПТ',w/2,h*.93,18,'#44617c','Arial','center');
+ text(ctx,title,w/2,h*.76,Math.min(51,650/(title.length*.58)),color,'Rubik','center');text(ctx,subtitle,w/2,h*.84,20,'#6c8da5','Rubik','center');text(ctx,'ХОО ТЧХУ / 2026',w/2,h*.93,18,'#44617c','Rubik','center');
 }
 function glowTexture(){return texture((ctx,w,h)=>{const g=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,w/2);g.addColorStop(0,'#ffffff55');g.addColorStop(.38,'#ffffff20');g.addColorStop(1,'#ffffff00');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);},256,256);}
 export function createYearScene(container,{onOpen,onReady,onError}){
  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
- renderer.domElement.setAttribute('role','img');renderer.domElement.setAttribute('aria-label','Темна неонова платформа з десятьма інтерактивними елементами');container.append(renderer.domElement);
+ renderer.domElement.setAttribute('role','img');renderer.domElement.setAttribute('aria-label','Темна неонова платформа з одинадцятьма інтерактивними елементами');container.append(renderer.domElement);
  const scene=new THREE.Scene();scene.background=new THREE.Color(0x060b16);scene.fog=new THREE.Fog(0x060b16,65,155);
  const camera=new THREE.PerspectiveCamera(37,1,.1,220);camera.position.set(31,29,39);const look=new THREE.Vector3(0,.7,0),camBase=camera.position.clone();
  scene.add(new THREE.HemisphereLight(0x86b5ff,0x12162a,1.8));
@@ -65,7 +65,7 @@ export function createYearScene(container,{onOpen,onReady,onError}){
  elements.forEach((e,i)=>{
   const g=podium(e,i);
   if(e.id==='people'){
-   team.forEach((p,k)=>{const col=k%4,row=Math.floor(k/4),x=(col-1.5)*1.02,y=1.04+row*1.28;const photo=plaque(g,(ctx,w,h)=>card(ctx,w,h,{title:p.role==='Координатор'?'КООРДИНАТОР':p.cohort==='new'?'НОВИЙ ІНСТРУКТОР':p.cohort==='former'?'ПОПЕРЕДНІЙ СКЛАД':'ІНСТРУКТОР',subtitle:p.cohort==='new'?'ВЕРЕСЕНЬ–ЛИСТОПАД':p.cohort==='former'?'СЕРПЕНЬ–ВЕРЕСЕНЬ':'БАЗОВИЙ СКЛАД',color:p.color,kind:'person',person:k}),{x,y,z:0,w:.86,h:1.15,angle:0,color:p.color});photo.group.userData.person=k;});
+   team.forEach((p,k)=>{const row=Math.floor(k/5),col=k%5,cols=Math.min(5,team.length-row*5),x=(col-(cols-1)/2)*.80,y=.99+row*1.19;const photo=plaque(g,(ctx,w,h)=>card(ctx,w,h,{title:p.name.toUpperCase(),subtitle:p.role.toUpperCase(),color:p.color,kind:'person',person:k}),{x,y,z:0,w:.72,h:1.05,angle:0,color:p.color});photo.group.userData.person=k;});
   }else if(e.id==='learning'){
    plaque(g,(ctx,w,h)=>card(ctx,w,h,{title:'ПІДГОТОВКА',color:e.accent}),{x:-.7,y:1.52,z:-.1,w:1.8,h:2.25,angle:.12,color:e.accent});
    for(let k=0;k<5;k++)box(g,1.45,.11,1.2,.9,.43+k*.12,.35,k%2?0x263153:0x18243b);
@@ -76,8 +76,12 @@ export function createYearScene(container,{onOpen,onReady,onError}){
    box(g,3.6,.06,2.75,0,.41,-.10,0x102a30);
    const coords=[[-.65,-1.13],[-.1,-1.04],[.27,-1.2],[.71,-.87],[.6,-.57],[1.12,-.45],[1.02,-.1],[1.31,.21],[1.01,.48],[1.12,.87],[.66,.91],[.43,1.2],[.07,1],[-.3,1.3],[-.56,.99],[-.95,1.03],[-.95,.68],[-1.25,.5],[-1.06,.14],[-1.3,-.15],[-1.02,-.48],[-1.02,-.83],[-.69,-.78]];
    const shape=new THREE.Shape();coords.forEach(([x,y],k)=>k?shape.lineTo(x,y):shape.moveTo(x,y));shape.closePath();const region=mesh(new THREE.ExtrudeGeometry(shape,{depth:.15,bevelEnabled:true,bevelSize:.02,bevelThickness:.015,bevelSegments:1,steps:1}),mat(0x1b514b,{emissive:0x257b60,emissiveIntensity:.25}),g,[0,.46,-.08]);region.rotation.x=-Math.PI/2;
-   [[-.5,-.4,'A'],[.6,.05,'Б'],[-.15,.8,'В']].forEach(([x,z,name])=>{const pin=new THREE.Group();pin.position.set(x,.65,z);pin.userData.place=name;g.add(pin);mesh(new THREE.CylinderGeometry(.025,.025,.5,8),neon(e.accent),pin,[0,.25,0]);mesh(new THREE.SphereGeometry(.13,16,12),neon(e.accent),pin,[0,.53,0]);const hit=mesh(new THREE.SphereGeometry(.25,8,8),new THREE.MeshBasicMaterial({visible:false}),pin,[0,.43,0]);hit.userData.hitArea=true;const ring=mesh(new THREE.RingGeometry(.18,.22,32),new THREE.MeshBasicMaterial({color:e.accent,side:THREE.DoubleSide,transparent:true,opacity:.6,toneMapped:false}),pin,[0,.005,0]);ring.rotation.x=-Math.PI/2;ring.userData.decoration=true;ring.raycast=()=>{};halos.push(ring);});
-   label(g,'УМОВНА МАПА / ДЕМО',0,.48,-1.3,2.8,.17,e.accent);
+   [[-.5,-.4,'kharkiv'],[-.8,.45,'berestyn'],[.15,.8,'lozova'],[.65,.1,'izium']].forEach(([x,z,name])=>{const pin=new THREE.Group();pin.position.set(x,.65,z);pin.userData.place=name;g.add(pin);mesh(new THREE.CylinderGeometry(.025,.025,.5,8),neon(e.accent),pin,[0,.25,0]);mesh(new THREE.SphereGeometry(.13,16,12),neon(e.accent),pin,[0,.53,0]);const hit=mesh(new THREE.SphereGeometry(.25,8,8),new THREE.MeshBasicMaterial({visible:false}),pin,[0,.43,0]);hit.userData.hitArea=true;const ring=mesh(new THREE.RingGeometry(.18,.22,32),new THREE.MeshBasicMaterial({color:e.accent,side:THREE.DoubleSide,transparent:true,opacity:.6,toneMapped:false}),pin,[0,.005,0]);ring.rotation.x=-Math.PI/2;ring.userData.decoration=true;ring.raycast=()=>{};halos.push(ring);});
+   label(g,'ХАРКІВСЬКА ОБЛАСТЬ',0,.48,-1.3,2.8,.17,e.accent);
+  }else if(e.id==='mapping'){
+   plaque(g,(ctx,w,h)=>card(ctx,w,h,{title:'MINE RISK MAP',subtitle:'ДАНІ → КАРТА → АНАЛІЗ',color:e.accent,kind:'chart'}),{x:0,y:1.6,z:-.35,w:3.15,h:1.95,color:e.accent});
+   box(g,3.35,.12,1.65,0,.42,.2,0x183443);outline(g,3.40,.14,1.70,[0,.43,.2],e.accent);
+   [-.8,0,.8].forEach((x,k)=>{mesh(new THREE.CylinderGeometry(.11,.11,.18,16),neon(e.accent),g,[x,.59,.55]);});
   }else if(e.id==='community'){
    for(let k=0;k<3;k++){const x=(k-1)*1.1;box(g,.85,.85,.78,x,.78,0,0x28303a);const roof=mesh(new THREE.ConeGeometry(.72,.48,4),mat(0x493c38,{emissive:0x9c6422,emissiveIntensity:.18}),g,[x,1.44,0]);roof.rotation.y=Math.PI/4;box(g,.22,.3,.02,x,1,.401,0x66a4a4);}
    const arc=new THREE.CatmullRomCurve3([new THREE.Vector3(-1.4,1.9,-.3),new THREE.Vector3(0,2.6,-.3),new THREE.Vector3(1.4,1.9,-.3)]);mesh(new THREE.TubeGeometry(arc,32,.025,7,false),neon(e.accent),g);

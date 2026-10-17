@@ -1,0 +1,8 @@
+{
+  "name": "department-year-2026",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "python3 scripts/check-site.py && node scripts/check-content.mjs"
+  }
+}

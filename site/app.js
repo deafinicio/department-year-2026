@@ -1,4 +1,4 @@
-import {chapters,elements,team,visibleLayers,FINAL_INDEX} from './story.js';
+import {chapters,elements,team,places,visibleLayers,FINAL_INDEX} from './story.js';
 import {createInspector} from './inspector.js';
 const $=id=>document.getElementById(id);
 let index=0,scene=null,autoTimer=null,showingOverview=false;
@@ -9,10 +9,10 @@ const inspector=createInspector({onOpen:stopAuto,isReduced:()=>reduced});
 const pointOf=el=>{const r=el.getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2];};
 function openCurrent(){if(index<1||index>elements.length)return;inspector.openElement(elements[index-1].id,scene?.origin(index)||pointOf($('open-section')));}
 function update(){
- const c=chapters[index],count=visibleLayers(index);document.documentElement.style.setProperty('--active',c.accent);
+ const c=chapters[index],count=visibleLayers(index);document.documentElement.style.setProperty('--active',c.accent);narrative.classList.toggle('final-chapter',index===FINAL_INDEX);
  $('eyebrow').textContent=index===0?`2026 / ${elements.length} СКЛАДОВИХ`:index===FINAL_INDEX?`${String(FINAL_INDEX).padStart(2,'0')} / ЦІЛІСНА КОМПОЗИЦІЯ`:c.eyebrow;
  const em=document.createElement('em');em.textContent=c.title[1];$('title').replaceChildren(document.createTextNode(c.title[0]),document.createElement('br'),em);$('description').textContent=c.description;
- $('layer-count').textContent=String(count).padStart(2,'0');$('layer-caption').textContent=count===elements.length?`Усі ${elements.length} складових на платформі`:count?elements[count-1].name:'Початок історії';$('step-counter').textContent=`${String(index).padStart(2,'0')} / ${String(FINAL_INDEX).padStart(2,'0')}`;
+ $('layer-count').textContent=String(count).padStart(2,'0');$('layer-total').textContent='/ '+elements.length;$('layer-caption').textContent=count===elements.length?`Усі ${elements.length} складових на платформі`:count?elements[count-1].name:'Початок історії';$('step-counter').textContent=`${String(index).padStart(2,'0')} / ${String(FINAL_INDEX).padStart(2,'0')}`;
  $('layer-indicator').querySelectorAll('i').forEach((el,i)=>el.classList.toggle('on',i<count));
  $('chapters').querySelectorAll('button').forEach((el,i)=>{el.classList.toggle('active',i===index);el.classList.toggle('passed',i<=index&&index>0);if(i===index)el.setAttribute('aria-current','step');else el.removeAttribute('aria-current');});
  $('next-label').textContent=index===FINAL_INDEX?'Скласти ще раз':index===elements.length?'Побачити весь рік':elements[index].addLabel;
@@ -20,7 +20,7 @@ function update(){
  $('overview').setAttribute('aria-pressed','false');$('scene-caption').textContent=index===0?'Додавайте елементи. Натискайте, щоб відкрити історії.':index===FINAL_INDEX?'Усі об’єкти клікабельні. Оберіть історію.':'Натисніть на об’єкт, щоб відкрити деталі.';
  $('quick-actions').replaceChildren();
  if(index===1){const b=document.createElement('button');b.textContent='Уся команда · '+team.length+' профілів';b.addEventListener('click',()=>inspector.openElement('people',scene?.origin(1)||pointOf(b)));$('quick-actions').append(b);}
- if(index===4)for(const name of ['A','Б','В']){const b=document.createElement('button');b.textContent='Точка '+name;b.addEventListener('click',()=>inspector.openElement('geography',scene?.origin(4)||pointOf(b),name));$('quick-actions').append(b);}
+ if(elements[index-1]?.id==='geography')for(const [id,p] of Object.entries(places)){const b=document.createElement('button');b.textContent=p.title;b.addEventListener('click',()=>inspector.openElement('geography',scene?.origin(index)||pointOf(b),id));$('quick-actions').append(b);}
  $('announcement').textContent=`${count} із ${elements.length} елементів додано. ${c.name}.`;
  narrative.classList.remove('changing');requestAnimationFrame(()=>narrative.classList.add('changing'));
 }
@@ -42,4 +42,4 @@ let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);
 window.addEventListener('hashchange',()=>{const i=chapters.findIndex(c=>c.id===location.hash.slice(1));go(i<0?0:i,{hash:false});});
 function error(message){stopAuto();$('loading')?.remove();if(document.querySelector('.error'))return;const block=document.createElement('div');block.className='error';block.setAttribute('role','alert');block.append(document.createTextNode(message));const b=document.createElement('button');b.textContent='Спробувати ще раз';b.addEventListener('click',()=>location.reload());block.append(b);document.body.append(block);}
 applyMotion();const initial=chapters.findIndex(c=>c.id===location.hash.slice(1));go(initial<0?0:initial,{hash:false,instant:true});
-try{const {createYearScene}=await import('./scene.js');scene=createYearScene($('viewport'),{onOpen:data=>{if(data.person!==undefined)inspector.openPerson(data.person,data.point);else inspector.openElement(data.element,data.point,data.place||null);},onReady:()=>$('loading')?.remove(),onError:error});scene.setReduced(reduced);const c=chapters[index];scene.setChapter(index,c.camera,c.look,{instant:true});}catch(e){console.error('3D initialization failed',e);error('Не вдалося запустити 3D-сцену. Перевірте підтримку WebGL 2 та апаратного прискорення. Історії доданих елементів доступні також через кнопки й каталог.');}
+try{await document.fonts?.load('500 24px Rubik');const {createYearScene}=await import('./scene.js');scene=createYearScene($('viewport'),{onOpen:data=>{if(data.person!==undefined)inspector.openPerson(data.person,data.point);else inspector.openElement(data.element,data.point,data.place||null);},onReady:()=>$('loading')?.remove(),onError:error});scene.setReduced(reduced);const c=chapters[index];scene.setChapter(index,c.camera,c.look,{instant:true});}catch(e){console.error('3D initialization failed',e);error('Не вдалося запустити 3D-сцену. Перевірте підтримку WebGL 2 та апаратного прискорення. Історії доданих елементів доступні також через кнопки й каталог.');}
