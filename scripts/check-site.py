@@ -43,6 +43,11 @@ assert len(json.loads((root / 'vendor/helvetiker_regular.typeface.json').read_te
 for name in ('Rubik.ttf', 'maplibre-gl.js', 'maplibre-gl.css', 'LICENSE-maplibre.txt', 'LICENSE-Rubik.txt'):
     assert (root / 'vendor' / name).stat().st_size > 100, f'Missing dependency: {name}'
 json.loads((root / 'assets/kharkiv-region.geojson').read_text())
+basemap = json.loads((root / 'assets/basemap-dark.json').read_text())
+assert 'cartocdn' not in (root / 'geo-map.js').read_text(), 'CARTO warning tiles must not return'
+assert basemap['version'] == 8
+assert basemap['sources']['openmaptiles']['url'] == 'https://tiles.openfreemap.org/planet'
+assert not re.search(r'cartocdn|api[_-]?key|access_token', json.dumps(basemap), re.I), 'Map must not require API keys'
 for path in [root / 'index.html', *root.glob('*.js'), *(root / 'assets').glob('*.svg')]:
     assert not re.search(r'демо|драфт|заглуш|буде додано|тут будуть|місце для фото', path.read_text(), re.I), f'Editing notice: {path.name}'
 assert not (root / '.openai').exists(), 'Hosting-specific files must not be published'
