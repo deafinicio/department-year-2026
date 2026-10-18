@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { FontLoader } from './vendor/FontLoader.js';
 import { TextGeometry } from './vendor/TextGeometry.js';
 import {elements,team,FINAL_INDEX} from './story.js';
+import {createPodcastStudio} from './studio.js';
 const clamp=x=>Math.max(0,Math.min(1,x));
 const mat=(color,extra={})=>new THREE.MeshStandardMaterial({color,roughness:.58,metalness:.25,...extra});
 const neon=color=>new THREE.MeshBasicMaterial({color,toneMapped:false});
@@ -88,10 +89,7 @@ export function createYearScene(container,{onOpen,onReady,onError}){
   }else if(e.id==='resources'){
    plaque(g,(ctx,w,h)=>card(ctx,w,h,{title:'ІНСТРУМЕНТИ',color:e.accent,kind:'chart'}),{x:0,y:1.5,z:-.3,w:2.65,h:1.7,color:e.accent});box(g,2.7,.10,1.3,0,.42,.2,0x21324d);outline(g,2.75,.10,1.35,[0,.43,.2],e.accent);
   }else if(e.id==='digital-space'){
-   box(g,3.4,2.2,.12,0,1.46,-1.12,0x172b42);outline(g,3.43,2.23,.14,[0,1.46,-1.12],e.accent);
-   box(g,.12,2.2,2.15,-1.66,1.46,-.10,0x142338);outline(g,.14,2.23,2.17,[-1.66,1.46,-.10],e.accent);
-   plaque(g,(ctx,w,h)=>card(ctx,w,h,{title:'ЦИФРОВИЙ ПРОСТІР',color:e.accent,kind:'chart'}),{x:0,y:1.72,z:-1.035,w:2.45,h:1.23,color:e.accent});
-   [-.77,.77].forEach(x=>{box(g,1.15,.09,.65,x,.92,.35,0x294059);box(g,.07,.53,.07,x-.4,.61,.35,0x23405b);box(g,.07,.53,.07,x+.4,.61,.35,0x23405b);box(g,.5,.1,.48,x,.63,1.05,0x354158);box(g,.5,.48,.07,x,.91,1.26,0x26384d);});
+   createPodcastStudio(g,{accent:e.accent});
   }else if(e.id==='partners'){
    [-.65,.65].forEach((x,k)=>{const torus=mesh(new THREE.TorusGeometry(.8,.12,12,50),mat(0x503669,{emissive:k?0x3043b0:0x7c2db0,emissiveIntensity:.65,metalness:.65}),g,[x,1.45,0]);torus.rotation.y=k?.30:-.30;});label(g,'ВЗАЄМОДІЯ',0,.37,.85,2.5,.25,e.accent);
   }else if(e.id==='statistics'){
