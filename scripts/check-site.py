@@ -15,7 +15,7 @@ class Page(HTMLParser):
         attrs = dict(attrs)
         if 'id' in attrs:
             self.ids.append(attrs['id'])
-        if tag in ('script', 'link'):
+        if tag in ('script', 'link') and attrs.get('rel') != 'canonical':
             target = attrs.get('src') or attrs.get('href')
             if target:
                 self.resources.append(target)
