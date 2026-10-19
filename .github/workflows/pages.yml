@@ -28,6 +28,8 @@ jobs:
         run: python3 scripts/check-site.py
       - name: Check presentation content
         run: node scripts/check-content.mjs
+      - name: Check cinematic framing and scene interactions
+        run: node --experimental-vm-modules scripts/check-cinema.mjs
 
   deploy:
     needs: validate

@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "python3 scripts/check-site.py && node scripts/check-content.mjs"
+    "check": "python3 scripts/check-site.py && node scripts/check-content.mjs && node --experimental-vm-modules scripts/check-cinema.mjs"
   }
 }
