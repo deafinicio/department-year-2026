@@ -36,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      actions: read
       pages: write
       id-token: write
     environment:
@@ -64,6 +65,19 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
+      - name: Wait for the Pages artifact to be indexed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          for attempt in {1..8}; do
+            if count=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?name=github-pages" --jq '.total_count') && [ "$count" -gt 0 ]; then
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "::error::The uploaded Pages artifact is not yet available."
+          exit 1
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
