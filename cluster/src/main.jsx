@@ -10,6 +10,7 @@ import {PhotoGallery,PhotoDialog} from './Photos.jsx';
 import KharkivBreakdown from './KharkivBreakdown.jsx';
 import MapDemo from './MapDemo.jsx';
 import {finaleDuration} from './timing.js';
+import {finaleProjection} from './finale-transition.js';
 import './style.css';
 
 const Platform=lazy(()=>import('./Platform.jsx'));
@@ -109,13 +110,19 @@ function App(){
     setIndex(current=>Math.max(0,Math.min(slides.length-1,typeof value==='function'?value(current):value)));
   },[]);
   useLayoutEffect(()=>{
-    if(!finale||!animate||!beforeFinale.current)return;
-    const from=beforeFinale.current,to=stageRef.current.getBoundingClientRect();
+    if(!finale)return;
+    const from=beforeFinale.current;
     beforeFinale.current=null;
-    const size=r=>({top:r.top+'px',left:r.left+'px',width:r.width+'px',height:r.height+'px'});
-    if(from.width<1||from.height<1)return;
-    const flight=stageRef.current.animate([size(from),size(to)],{duration:finaleDuration*1000,easing:'cubic-bezier(.42,0,.58,1)'});
-    return ()=>flight.cancel();
+    if(!animate||!from)return;
+    const stage=stageRef.current,visual=stage.querySelector('.visual');
+    const initial=finaleProjection(from,stage.getBoundingClientRect());
+    if(!initial||!visual||!stage.animate)return;
+    const timing={duration:finaleDuration*1000,easing:'cubic-bezier(.42,0,.58,1)',fill:'both'};
+    const reveal=stage.animate([{clipPath:initial.clipPath},{clipPath:'inset(0px 0px 0px 0px)'}],timing);
+    const expand=visual.animate([{transform:initial.transform},{transform:'translate3d(0px,0px,0) scale(1)'}],timing);
+    const start=document.timeline.currentTime;
+    if(start!==null){reveal.startTime=start;expand.startTime=start;}
+    return ()=>{reveal.cancel();expand.cancel();};
   },[finale,animate]);
   const openDemo=useCallback(()=>{
     if(demoSession.current)return;

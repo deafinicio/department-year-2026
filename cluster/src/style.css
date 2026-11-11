@@ -209,7 +209,7 @@ tr:nth-child(even) td{background:#8dcaed08}
 .finale .top,.finale .copy-panel,.finale .control,.finale .stage-top,.finale .stage-bottom{display:none}
 .finale .workspace{display:block}
 .finale .stage{position:fixed;inset:0;margin:0;border:0;border-radius:0;display:block;z-index:5;background:#0b1526;height:auto}
-.finale .visual{position:absolute;inset:0}
+.finale .visual{position:absolute;inset:0;transform-origin:center center}
 .finale .map-drawing{padding:0}
 .finale .map-credit{position:absolute;bottom:8px;right:10px;padding:5px 8px;background:#0a1422d9;border-radius:5px;z-index:2}
 .finale-overlay{position:absolute;z-index:2;inset:0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:clamp(16px,4vw,54px);pointer-events:none;animation:finale-title .55s 1.7s both}

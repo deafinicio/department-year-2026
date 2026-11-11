@@ -33,7 +33,7 @@ function Camera({regionIndex,phase,animate,arrival}){
       const fly=travel.current;
       fly.elapsed+=Math.min(dt,.09);
       arrival.current=Math.min(1,fly.elapsed/fly.duration);
-      flightPosition(fly.from,pose,arrival.current,camera.position,target.current);
+      flightPosition(fly.from,pose,arrival.current,camera.position,target.current,regionIndex!==4);
       if(arrival.current===1)travel.current=null;
     }else if(animate){
       const t=1-Math.exp(-Math.min(dt,.06)*4.5);
@@ -196,7 +196,7 @@ function ContextWatch({onFailure}){
 }
 
 export default function Platform({onFailure,...props}){
-  return <Canvas frameloop={props.animate?'always':'demand'} shadows="percentage" camera={{position:[4,35,14],fov,near:.1,far}}
+  return <Canvas resize={{offsetSize:true}} frameloop={props.animate?'always':'demand'} shadows="percentage" camera={{position:[4,35,14],fov,near:.1,far}}
     dpr={props.quality==='high'?[1,1.5]:1}
     gl={{antialias:true,alpha:false,powerPreference:'high-performance',stencil:false}}
     onCreated={({gl})=>{gl.toneMapping=THREE.ACESFilmicToneMapping;gl.toneMappingExposure=1.1;}}

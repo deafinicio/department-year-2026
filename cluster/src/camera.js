@@ -27,10 +27,10 @@ export function framing(regionIndex,phase,aspect){
   return {position:back.multiplyScalar(distance).add(look),look,bounds};
 }
 
-export function flightPosition(start,end,t,position,look){
+export function flightPosition(start,end,t,position,look,arcing=true){
   const p=MathUtils.clamp(t,0,1);
   const ease=p*p*(3-2*p);
-  const arc=Math.sin(Math.PI*p)**2;
+  const arc=arcing?Math.sin(Math.PI*p)**2:0;
   const distance=start.look.distanceTo(end.look);
   position.lerpVectors(start.position,end.position,ease);
   position.y+=arc*MathUtils.clamp(distance*.8,2,7.4);
