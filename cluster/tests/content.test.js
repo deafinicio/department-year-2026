@@ -1,16 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {regions,slides,sharedColumns,sharedRows,sections} from '../src/content.js';
+import {regions,slides,sharedColumns,sharedRows,sections,regionalSlideIndices,sharedIndex} from '../src/content.js';
 
-test('matches the 14-page source and preserves the order of speakers',()=>{
-  assert.equal(slides.length,14);
+test('keeps the regional sequence and places the Kharkiv demo before plans',()=>{
+  assert.equal(slides.length,15);
+  assert.equal(sharedIndex,14);
   assert.equal(slides[0].kind,'opening');
   assert.equal(slides.at(-1).kind,'shared');
   assert.equal(new Set(slides.map(s=>s.id)).size,slides.length);
   assert.deepEqual(regions.map(r=>r.id),['chernihiv','sumy','kharkiv']);
   for(let i=0;i<regions.length;i++){
-    const chapter=slides.slice(1+4*i,5+4*i);
-    assert.deepEqual(chapter.map(s=>s.kind),sections.map(s=>s[0]));
+    const chapter=regionalSlideIndices[i].map(index=>slides[index]);
+    const kinds=sections.map(s=>s[0]);
+    if(regions[i].id==='kharkiv')kinds.splice(3,0,'demo');
+    assert.deepEqual(chapter.map(s=>s.kind),kinds);
     assert(chapter.every(s=>s.region===regions[i]&&s.regionIndex===i));
   }
 });
@@ -23,9 +26,11 @@ test('regional tables retain all rows and figures are only provided where source
   assert(regions.flatMap(r=>r.results).every(row=>row.length===3&&row[0]&&row[1]));
 });
 
-test('shared discussion table has the three original prompts and five rows',()=>{
+test('shared discussion table has the three original prompts and both supplied rows',()=>{
   assert.deepEqual(sharedColumns,['Що завадило?','Як ми реагували?','Що змінили в роботі?']);
-  assert.equal(sharedRows.length,5);
+  assert.equal(sharedRows.length,2);
+  assert(sharedRows.every(row=>row[0]&&row[1]));
+  assert.equal(sharedRows[1][2],'');
   assert(sharedRows.every(row=>row.length===sharedColumns.length&&row.every(v=>typeof v==='string')));
 });
 

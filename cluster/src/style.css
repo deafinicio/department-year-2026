@@ -173,3 +173,34 @@ tr:nth-child(even) td{background:#8dcaed08}
   .stage.has-photos{height:clamp(410px,70vh,540px);grid-template-rows:auto minmax(94px,1fr) auto minmax(0,clamp(180px,36vh,320px)) auto}
 }
 @media(max-width:470px){.breakdown-tables{grid-template-columns:1fr}}
+
+/* Full-viewport live tool and wider closing table. */
+.demo-intro{margin-top:16px;max-width:510px}
+.demo-features{margin-top:20px;max-width:530px}
+.demo-features svg{color:var(--accent);margin-top:3px}
+.demo-launch{margin:16px 0 0;width:fit-content}
+@media(min-width:851px){
+  .shared .workspace{grid-template-columns:minmax(0,1fr) minmax(210px,24%)}
+  .shared h1{font-size:clamp(24px,2.65vw,43px)}
+}
+.shared-table td{vertical-align:top;line-height:1.5;white-space:normal}
+.shared-table th:nth-child(1){width:38%}
+.shared-table th:nth-child(2){width:38%}
+.shared-table th:nth-child(3){width:24%}
+.map-demo-dialog{position:fixed;inset:0;margin:0;padding:0;border:0;width:100%;height:100dvh;max-width:none;max-height:none;overflow:hidden;color:#f0f7ff;background:#080e1a}
+.map-demo-dialog[open]{display:grid;grid-template-rows:auto minmax(0,1fr)}
+.map-demo-dialog::backdrop{background:#080e1a}
+.map-demo-bar{display:flex;align-items:center;gap:9px;padding:8px 14px;border-bottom:1px solid var(--border);background:#142238}
+.map-demo-bar strong{font-size:14px;margin-right:auto;white-space:nowrap}
+.map-demo-bar small{font-size:11px;color:#a9bfd0}
+.map-demo-bar nav{display:flex;gap:5px}
+.map-demo-bar button,.map-demo-bar a{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;border-radius:6px;padding:6px 9px;border:1px solid var(--border);background:#1b2f48;color:#e2effd;font-size:12px}
+.map-demo-bar .map-demo-next{background:#b4e6b8;color:#12281d;font-weight:800}
+.map-demo-dialog iframe{width:100%;height:100%;min-height:0;border:0;background:#080e1a}
+@media(max-width:620px){
+  .map-demo-bar{gap:4px;flex-wrap:wrap;padding:6px}
+  .map-demo-bar strong{font-size:12px;width:100%}
+  .map-demo-bar small{display:none}
+  .map-demo-bar button,.map-demo-bar a{padding:5px 6px;font-size:10px}
+  .map-demo-bar .map-demo-next{margin-left:auto}
+}
