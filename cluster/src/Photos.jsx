@@ -18,27 +18,23 @@ export function PhotoGallery({photos,selected,onSelect,onOpen}){
   </section>;
 }
 
-export function PhotoDialog({dialogRef,photos,selected,onSelect}){
+export function PhotoDialog({dialogRef,photos,selected,onStep,onDismiss}){
   const item=photos[selected];
   const pointerStarted=useRef(false);
-  function key(e){
-    if(!photos.length||!['ArrowLeft','ArrowRight'].includes(e.key))return;
-    e.preventDefault();e.stopPropagation();
-    onSelect((selected+(e.key==='ArrowRight'?1:photos.length-1))%photos.length);
-  }
-  return <dialog className="photo-dialog" ref={dialogRef} aria-label="Перегляд зображення" onKeyDown={key}
+  return <dialog className="photo-dialog" ref={dialogRef} aria-label="Перегляд зображення"
+    onCancel={e=>{e.preventDefault();onDismiss();}}
     onPointerDown={e=>{pointerStarted.current=e.target===e.currentTarget;}}
-    onClick={e=>{if(e.target===e.currentTarget&&pointerStarted.current)dialogRef.current.close();}}>
+    onClick={e=>{if(e.target===e.currentTarget&&pointerStarted.current)onDismiss();}}>
     {item&&<div className="photo-dialog-content">
       <div className="photo-dialog-bar"><div><strong>{item.title}</strong><small>{item.caption}</small></div>
-        <button aria-label="Закрити зображення" onClick={()=>dialogRef.current.close()} autoFocus><X size={22}/></button>
+        <button aria-label="Закрити зображення" onClick={onDismiss} autoFocus><X size={22}/></button>
       </div>
       <img src={item.url} alt={item.title} decoding="async"/>
-      {photos.length>1&&<div className="photo-dialog-nav">
-        <button aria-label="Попередній кадр" onClick={()=>onSelect((selected+photos.length-1)%photos.length)}><ArrowLeft size={19}/></button>
-        <span>{selected+1} / {photos.length}</span>
-        <button aria-label="Наступний кадр" onClick={()=>onSelect((selected+1)%photos.length)}><ArrowRight size={19}/></button>
-      </div>}
+      <div className="photo-dialog-nav">
+        <button aria-label={selected?'Попередній кадр':'Повернутися до слайда'} onClick={()=>onStep(-1)}><ArrowLeft size={19}/></button>
+        <span aria-live="polite">{selected+1} / {photos.length}</span>
+        <button aria-label={selected+1<photos.length?'Наступний кадр':'Наступний слайд'} onClick={()=>onStep(1)}><ArrowRight size={19}/></button>
+      </div>
     </div>}
   </dialog>;
 }

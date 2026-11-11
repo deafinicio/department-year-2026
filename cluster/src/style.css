@@ -157,3 +157,19 @@ tr:nth-child(even) td{background:#8dcaed08}
   .photo-caption strong{font-size:10px}
   .map-credit{font-size:7px}
 }
+
+/* Larger photographs in the presentation and in the clicker-driven viewer. */
+.stage.has-photos{grid-template-rows:auto minmax(96px,1fr) auto minmax(0,clamp(160px,40vh,400px)) auto}
+.photo-dialog{width:min(1600px,97vw);max-height:97dvh}
+.photo-dialog img{max-height:81dvh}
+.stats-breakdown{margin-top:13px;max-width:590px;font-size:12px;color:var(--muted)}
+.stats-breakdown summary{cursor:pointer;font-weight:780;color:var(--accent);width:fit-content;padding:5px 0}
+.stats-breakdown p{margin:6px 0 8px}
+.breakdown-tables{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
+.breakdown-tables table{border:1px solid var(--border);font-variant-numeric:tabular-nums}
+.breakdown-tables th,.breakdown-tables td{padding:5px 6px;font-size:11px}
+.breakdown-tables tbody th{background:transparent;border-top:1px solid var(--border)}
+@media(max-width:850px){
+  .stage.has-photos{height:clamp(410px,70vh,540px);grid-template-rows:auto minmax(94px,1fr) auto minmax(0,clamp(180px,36vh,320px)) auto}
+}
+@media(max-width:470px){.breakdown-tables{grid-template-columns:1fr}}

@@ -1,4 +1,6 @@
 // Структура й факти: наданий PDF «Північно Східний кластер», 11.11.2026.
+import {audience as kharkivAudience,total as kharkivTotal} from './kharkiv-stats.js';
+
 export const regions = [
   {
     id:'chernihiv', short:'Чернігівщина', name:'Чернігівська область', color:'#8cdef3', speaker:'Анна Глеч', role:'Менеджер проєкту з мінної небезпеки',
@@ -52,7 +54,9 @@ export const regions = [
   },
   {
     id:'kharkiv', short:'Харківщина', name:'Харківська область', color:'#b4e6b8', speaker:'Олександр Бондар', role:'',
-    metrics:[],
+    cutoff:'Січень–жовтень 2026 року включно',
+    metrics:[[String(kharkivTotal).replace(/\B(?=(\d{3})+(?!\d))/g,' '),'охоплених осіб']],
+    audience:kharkivAudience,
     results:[
       ['Облаштування 5 класів безпеки','Облаштовано 2 класи безпеки; передано 8.',''],
       ['Передача маркувальних знаків підрозділам ДСНС','Передача ще не відбулася.','Очікується поставка.'],

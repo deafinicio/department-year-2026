@@ -19,7 +19,7 @@ test('regional tables retain all rows and figures are only provided where source
   assert.deepEqual(regions.map(r=>r.results.length),[3,8,4]);
   assert.deepEqual(regions.map(r=>r.achievements.length),[3,4,3]);
   assert.deepEqual(regions.map(r=>r.plans.length),[5,5,6]);
-  assert.deepEqual(regions.map(r=>r.metrics.map(m=>m[0])),[['4 797','56,85 %','43,15 %'],['10 552','731'],[]]);
+  assert.deepEqual(regions.map(r=>r.metrics.map(m=>m[0])),[['4 797','56,85 %','43,15 %'],['10 552','731'],['6 985']]);
   assert(regions.flatMap(r=>r.results).every(row=>row.length===3&&row[0]&&row[1]));
 });
 

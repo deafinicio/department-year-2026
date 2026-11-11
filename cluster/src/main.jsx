@@ -7,6 +7,7 @@ import {regions,slides,sharedRows,sharedColumns,sections} from './content.js';
 import FallbackPlatform from './FallbackPlatform.jsx';
 import {slidePhotos} from './photos.js';
 import {PhotoGallery,PhotoDialog} from './Photos.jsx';
+import KharkivBreakdown from './KharkivBreakdown.jsx';
 import './style.css';
 
 const Platform=lazy(()=>import('./Platform.jsx'));
@@ -60,6 +61,7 @@ function Body({slide,photos,onOpen}){
       <dl className="metrics">{r.metrics.map(([number,label,date])=><div key={label}><dt>{label}{date&&<small>{date}</small>}</dt><dd>{number}</dd></div>)}</dl>
     </>}
     {r.audience&&<Audience audience={r.audience}/>}
+    {r.id==='kharkiv'&&<KharkivBreakdown/>}
     <div className="speaker"><span className="speaker-dot"/><div><strong>{r.speaker}</strong><small>{r.role||'Доповідь області'}</small></div></div>
   </>;
   if(slide.kind==='results')return <DataTable columns={resultColumns} rows={r.results} kind="results-table" photos={photos} onOpen={onOpen}/>;
@@ -79,12 +81,26 @@ function App(){
   const osReduced=useReducedMotion(),animate=!osReduced&&!paused;
   const panel=useRef(null),dialogRef=useRef(null);
   const [photoChoice,setPhotoChoice]=useState({id:null,index:0});
+  const [skippedGallery,setSkippedGallery]=useState(false);
   const slide=slides[index],active=slide.regionIndex;
   const photos=slidePhotos[slide.id]||[];
   const selected=photoChoice.id===slide.id?photoChoice.index:0;
-  const selectPhoto=i=>setPhotoChoice({id:slide.id,index:i});
-  const openPhoto=i=>{selectPhoto(i);dialogRef.current?.showModal();};
+  const selectPhoto=useCallback(i=>setPhotoChoice({id:slide.id,index:i}),[slide.id]);
+  const openPhoto=useCallback(i=>{selectPhoto(i);dialogRef.current?.showModal();},[selectPhoto]);
   const go=useCallback((value)=>setIndex(current=>Math.max(0,Math.min(slides.length-1,typeof value==='function'?value(current):value))),[]);
+  const step=useCallback(direction=>{
+    const dialog=dialogRef.current;
+    if(dialog?.open){
+      const next=selected+direction;
+      if(next>=0&&next<photos.length){selectPhoto(next);return;}
+      dialog.close();
+      if(direction>0)go(i=>i+1);
+      return;
+    }
+    if(direction>0&&photos.length&&!skippedGallery){openPhoto(0);return;}
+    go(i=>i+direction);
+  },[selected,photos.length,skippedGallery,selectPhoto,openPhoto,go]);
+  const dismissPhoto=()=>{setSkippedGallery(true);dialogRef.current?.close();};
   const failure=useCallback(()=>setCanRender(false),[]);
   const toggleFullscreen=useCallback(async()=>{
     try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen?.();}catch{}
@@ -93,22 +109,23 @@ function App(){
     const id=slides[index].id;
     if(location.hash!=='#'+id)history.replaceState(null,'','#'+id);
     panel.current?.scrollTo(0,0);
+    setSkippedGallery(false);
     if(dialogRef.current?.open)dialogRef.current.close();
   },[index]);
   useEffect(()=>{
     function hash(){go(slideFromHash());}
     function full(){setFullscreen(Boolean(document.fullscreenElement));}
     function key(e){
-      if(dialogRef.current?.open||e.altKey||e.ctrlKey||e.metaKey||e.shiftKey||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.target.isContentEditable)return;
-      if(['ArrowRight','PageDown'].includes(e.key)||(e.code==='Space'&&e.target===document.body)){e.preventDefault();if(e.target.tagName==='BUTTON')e.target.blur();go(i=>i+1);}
-      else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();if(e.target.tagName==='BUTTON')e.target.blur();go(i=>i-1);}
+      if(e.altKey||e.ctrlKey||e.metaKey||e.shiftKey||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||e.target.isContentEditable)return;
+      if(['ArrowRight','PageDown'].includes(e.key)||(e.code==='Space'&&e.target===document.body)){e.preventDefault();if(e.target.tagName==='BUTTON')e.target.blur();step(1);}
+      else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();if(e.target.tagName==='BUTTON')e.target.blur();step(-1);}
       else if(e.key==='Home'){e.preventDefault();go(0);}
       else if(e.key==='End'){e.preventDefault();go(slides.length-1);}
       else if(e.code==='KeyF'){e.preventDefault();toggleFullscreen();}
     }
     window.addEventListener('hashchange',hash);document.addEventListener('fullscreenchange',full);window.addEventListener('keydown',key);
     return()=>{window.removeEventListener('hashchange',hash);document.removeEventListener('fullscreenchange',full);window.removeEventListener('keydown',key);};
-  },[go,toggleFullscreen]);
+  },[go,step,toggleFullscreen]);
   const fallback=<FallbackPlatform regionIndex={active} phase={slide.phase} animate={animate}/>;
   const chapter=slide.region?slide.region.short:slide.kind==='shared'?'Спільний підсумок':'Підсумки діяльності';
   return <MotionConfig reducedMotion={animate?'never':'always'}>
@@ -157,10 +174,10 @@ function App(){
           <span className="counter"><b>{pad(index+1)}</b> / {slides.length}</span>
           {slide.region&&<nav className="scene-steps" aria-label="Сцени області">{sections.map((s,i)=><button key={s[0]} aria-label={s[1]} title={s[1]} aria-current={slide.phase===i?'step':undefined} onClick={()=>go(1+active*4+i)}/>)}</nav>}
           <span className="keyboard">← → &nbsp; PageUp / PageDown</span>
-          <button className="next" onClick={()=>go(i=>i+1)} disabled={index===slides.length-1}>{index===0?'Почати виступ':index===slides.length-1?'Фінальний слайд':'Далі'} {index===slides.length-1?<ArrowDownRight size={17}/>:<ArrowRight size={17}/>}</button>
+          <button className="next" onClick={()=>step(1)} disabled={index===slides.length-1}>{index===0?'Почати виступ':index===slides.length-1?'Фінальний слайд':photos.length&&!skippedGallery?'Показати фото':'Далі'} {index===slides.length-1?<ArrowDownRight size={17}/>:<ArrowRight size={17}/>}</button>
         </div>
       </footer>
-      <PhotoDialog dialogRef={dialogRef} photos={photos} selected={selected} onSelect={selectPhoto}/>
+      <PhotoDialog dialogRef={dialogRef} photos={photos} selected={selected} onStep={step} onDismiss={dismissPhoto}/>
       <p className="sr-only" aria-live="polite">Слайд {index+1} з {slides.length}. {slide.title}.</p>
     </div>
   </MotionConfig>;
