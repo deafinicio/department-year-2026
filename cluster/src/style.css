@@ -204,3 +204,18 @@ tr:nth-child(even) td{background:#8dcaed08}
   .map-demo-bar button,.map-demo-bar a{padding:5px 6px;font-size:10px}
   .map-demo-bar .map-demo-next{margin-left:auto}
 }
+
+/* Keep the live map mounted while its viewport grows into the final scene. */
+.finale .top,.finale .copy-panel,.finale .control,.finale .stage-top,.finale .stage-bottom{display:none}
+.finale .workspace{display:block}
+.finale .stage{position:fixed;inset:0;margin:0;border:0;border-radius:0;display:block;z-index:5;background:#0b1526;height:auto}
+.finale .visual{position:absolute;inset:0}
+.finale .map-drawing{padding:0}
+.finale .map-credit{position:absolute;bottom:8px;right:10px;padding:5px 8px;background:#0a1422d9;border-radius:5px;z-index:2}
+.finale-overlay{position:absolute;z-index:2;inset:0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:clamp(16px,4vw,54px);pointer-events:none;animation:finale-title .55s 1.7s both}
+.finale-overlay small{color:#a3c3dd;font-size:10px;font-weight:850;letter-spacing:.13em}
+.finale-overlay h1{font-size:clamp(24px,3.5vw,48px);margin:6px 0 0;text-shadow:0 2px 18px #091322}
+.finale-overlay button{pointer-events:auto;border:1px solid #acc8e148;background:#15253bdb;border-radius:8px;padding:9px;display:grid;place-items:center}
+.no-motion .finale-overlay{animation:none}
+@keyframes finale-title{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(min-width:851px){.shared .stage .visual{align-self:center;aspect-ratio:1.38}}

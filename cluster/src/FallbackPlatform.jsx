@@ -1,6 +1,7 @@
 import {useEffect,useRef} from 'react';
 import {motion} from 'motion/react';
 import {regions} from './content.js';
+import {finaleDuration} from './timing.js';
 import {mapAreas,oblasts,mapBox,isOblast,routePath} from './geography.js';
 
 export default function FallbackPlatform({regionIndex,phase,animate}){
@@ -11,7 +12,7 @@ export default function FallbackPlatform({regionIndex,phase,animate}){
   const regionFocus=isOblast(regionIndex);
   return <motion.svg className="platform-drawing map-drawing" initial={false}
     viewBox={box} animate={{viewBox:flight?[mapBox(from),mapBox(-1),box]:box}}
-    transition={{duration:animate?(flight?1.65:.62):0,ease:'easeInOut'}}
+    transition={{duration:animate?(regionIndex===4?finaleDuration:flight?1.65:.62):0,ease:'easeInOut'}}
     role="img" aria-label="Мапа України: Чернігівська, Сумська та Харківська області">
     <defs>
       <linearGradient id="land-tone" x2="1" y2="1"><stop stopColor="#263f5a"/><stop offset="1" stopColor="#15253b"/></linearGradient>

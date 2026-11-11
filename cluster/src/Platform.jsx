@@ -5,7 +5,7 @@ import {Bloom,EffectComposer,Vignette} from '@react-three/postprocessing';
 import * as THREE from 'three';
 import {regions} from './content.js';
 
-import {fov,far,framing,flightPosition} from './camera.js';
+import {fov,far,framing,flightPosition,finaleDuration} from './camera.js';
 import {mapAreas,oblasts,isOblast} from './geography.js';
 const dark=new THREE.Color('#0b1526');
 const accent=(color,level)=>new THREE.Color(color).multiplyScalar(level);
@@ -16,7 +16,8 @@ const cablePaths=[0,1].map(i=>{
 
 function Camera({regionIndex,phase,animate,arrival}){
   const camera=useThree(s=>s.camera),size=useThree(s=>s.size);
-  const pose=useMemo(()=>framing(regionIndex,phase,size.width/Math.max(1,size.height)),[regionIndex,phase,size.width,size.height]);
+  const aspect=regionIndex===4?window.innerWidth/Math.max(1,window.innerHeight):size.width/Math.max(1,size.height);
+  const pose=useMemo(()=>framing(regionIndex,phase,aspect),[regionIndex,phase,aspect]);
   const target=useRef(pose.look.clone()),last=useRef(null),travel=useRef(null);
   useFrame((_,dt)=>{
     if(!last.current||!animate){
@@ -24,7 +25,7 @@ function Camera({regionIndex,phase,animate,arrival}){
       travel.current=null;arrival.current=1;
     }else if(last.current.region!==regionIndex){
       const from={position:camera.position.clone(),look:target.current.clone()};
-      travel.current={from,elapsed:0,duration:isOblast(last.current.region)&&isOblast(regionIndex)?1.65:1.25};
+      travel.current={from,elapsed:0,duration:regionIndex===4?finaleDuration:isOblast(last.current.region)&&isOblast(regionIndex)?1.65:1.25};
       arrival.current=0;
     }
     last.current={region:regionIndex};

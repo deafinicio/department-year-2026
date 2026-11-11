@@ -13,7 +13,9 @@ export const mapAreas=boundaries.map(([name,polygons])=>({
   path:polygons.flatMap(p=>p.map(r=>'M'+r.map(([x,z])=>x+','+z).join('L')+'Z')).join(' '),
 }));
 export const mapOverviewBox='-16.5 -9.25 32.65 23.15';
+export const clusterBounds=[[-2.7,12.1],[-.36,1.38],[-8.82,1.4]];
 export const mapBox=i=>{
+  if(i===3)return '-3 -9.15 15.4 11';
   if(!isOblast(i))return mapOverviewBox;
   const [x,z]=oblasts[i].center;
   return `${x-5.2} ${z-3.05} 10.4 7.5`;

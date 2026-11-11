@@ -109,7 +109,8 @@ export const slides=[
     return [section,{...section,id:'kharkiv-map',kind:'demo',short:'Мапа й дашборд',title:'Від даних до мапи й дашборда'}];
   })),
   {id:'shared',kind:'shared',short:'Спільний підсумок',title:'Виклики, що вплинули на виконання плану для північно-східного кластеру',regionIndex:3,phase:0},
+  {id:'finale',kind:'finale',short:'Фінал',title:'Дякуємо за увагу',regionIndex:4,phase:0},
 ];
 
 export const regionalSlideIndices=regions.map((_,i)=>slides.flatMap((s,index)=>s.regionIndex===i?[index]:[]));
-export const sharedIndex=slides.length-1;
+export const sharedIndex=slides.findIndex(s=>s.kind==='shared');

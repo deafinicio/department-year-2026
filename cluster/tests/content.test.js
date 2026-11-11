@@ -3,10 +3,11 @@ import assert from 'node:assert/strict';
 import {regions,slides,sharedColumns,sharedRows,sections,regionalSlideIndices,sharedIndex} from '../src/content.js';
 
 test('keeps the regional sequence and places the Kharkiv demo before plans',()=>{
-  assert.equal(slides.length,15);
+  assert.equal(slides.length,16);
   assert.equal(sharedIndex,14);
   assert.equal(slides[0].kind,'opening');
-  assert.equal(slides.at(-1).kind,'shared');
+  assert.equal(slides.at(-2).kind,'shared');
+  assert.equal(slides.at(-1).kind,'finale');
   assert.equal(new Set(slides.map(s=>s.id)).size,slides.length);
   assert.deepEqual(regions.map(r=>r.id),['chernihiv','sumy','kharkiv']);
   for(let i=0;i<regions.length;i++){

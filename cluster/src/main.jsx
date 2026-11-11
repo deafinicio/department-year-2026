@@ -1,4 +1,4 @@
-import React,{Component,lazy,Suspense,useCallback,useEffect,useRef,useState} from 'react';
+import React,{Component,lazy,Suspense,useCallback,useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {MotionConfig,motion,useReducedMotion} from 'motion/react';
 import {ArrowDownRight,ArrowLeft,ArrowRight,ChartNoAxesCombined,Image as PhotoIcon,Layers3,Maximize,Minimize,Pause,Play,ScanLine,Sparkles} from 'lucide-react';
@@ -9,6 +9,7 @@ import {slidePhotos} from './photos.js';
 import {PhotoGallery,PhotoDialog} from './Photos.jsx';
 import KharkivBreakdown from './KharkivBreakdown.jsx';
 import MapDemo from './MapDemo.jsx';
+import {finaleDuration} from './timing.js';
 import './style.css';
 
 const Platform=lazy(()=>import('./Platform.jsx'));
@@ -49,6 +50,7 @@ function Audience({audience}){
   </section>;
 }
 function Body({slide,photos,onOpen,onDemo}){
+  if(slide.kind==='finale')return null;
   const r=slide.region;
   if(slide.kind==='opening')return <>
     <p className="lead">Підсумки діяльності за 2026 рік</p>
@@ -91,16 +93,30 @@ function App(){
   const [demoOpen,setDemoOpen]=useState(false);
   const demoSession=useRef(null);
   const osReduced=useReducedMotion(),animate=!osReduced&&!paused;
-  const panel=useRef(null),dialogRef=useRef(null);
+  const panel=useRef(null),dialogRef=useRef(null),stageRef=useRef(null),beforeFinale=useRef(null);
   const [photoChoice,setPhotoChoice]=useState({id:null,index:0});
   const [skippedGallery,setSkippedGallery]=useState(false);
   const slide=slides[index],active=slide.regionIndex;
+  const finale=slide.kind==='finale';
   const regionSteps=regionalSlideIndices[active]||[];
   const photos=slidePhotos[slide.id]||[];
   const selected=photoChoice.id===slide.id?photoChoice.index:0;
   const selectPhoto=useCallback(i=>setPhotoChoice({id:slide.id,index:i}),[slide.id]);
   const openPhoto=useCallback(i=>{selectPhoto(i);dialogRef.current?.showModal();},[selectPhoto]);
-  const go=useCallback((value)=>setIndex(current=>Math.max(0,Math.min(slides.length-1,typeof value==='function'?value(current):value))),[]);
+  const go=useCallback(value=>{
+    const visual=stageRef.current?.querySelector('.visual');
+    beforeFinale.current=visual?.getBoundingClientRect();
+    setIndex(current=>Math.max(0,Math.min(slides.length-1,typeof value==='function'?value(current):value)));
+  },[]);
+  useLayoutEffect(()=>{
+    if(!finale||!animate||!beforeFinale.current)return;
+    const from=beforeFinale.current,to=stageRef.current.getBoundingClientRect();
+    beforeFinale.current=null;
+    const size=r=>({top:r.top+'px',left:r.left+'px',width:r.width+'px',height:r.height+'px'});
+    if(from.width<1||from.height<1)return;
+    const flight=stageRef.current.animate([size(from),size(to)],{duration:finaleDuration*1000,easing:'cubic-bezier(.42,0,.58,1)'});
+    return ()=>flight.cancel();
+  },[finale,animate]);
   const openDemo=useCallback(()=>{
     if(demoSession.current)return;
     const session={native:null};
@@ -173,14 +189,18 @@ function App(){
         </div>
       </header>
       <main className="workspace">
-        <section className="copy-panel" ref={panel} aria-label="Поточний слайд">
+        <section className="copy-panel" ref={panel} hidden={finale} aria-label="Поточний слайд">
             <motion.article key={slide.id} className="slide" initial={animate?{opacity:0,y:10}:false} animate={{opacity:1,y:0}} transition={{duration:animate?.34:0,ease:[.22,1,.36,1]}}>
               <p className="kicker"><span className="status-light"/>{slide.region?slide.region.name:chapter}<span className="phase">{slide.region?pad(regionSteps.indexOf(index)+1)+' / '+pad(regionSteps.length):slide.kind==='shared'?'ТРИ ОБЛАСТІ':'11.11.2026'}</span></p>
               <h1>{slide.title}</h1>
               <Body slide={slide} photos={photos} onOpen={openPhoto} onDemo={openDemo}/>
             </motion.article>
         </section>
-        <section className={photos.length?'stage has-photos':'stage'} aria-label="Мапа та ілюстрації">
+        <section ref={stageRef} className={photos.length?'stage has-photos':'stage'} aria-label="Мапа та ілюстрації">
+          {finale&&<div className="finale-overlay">
+            <div><small>ПІВНІЧНО-СХІДНИЙ КЛАСТЕР · 2026</small><h1>{slide.title}</h1></div>
+            <button type="button" onClick={()=>go(sharedIndex)} aria-label="Повернутися до підсумкової таблиці" title="Повернутися до таблиці · Page Up"><ArrowLeft size={19}/></button>
+          </div>}
           <div className="stage-top"><span><ScanLine size={15}/> МАПА УКРАЇНИ</span><span>{canRender?'3D':'2D'}</span></div>
           <div className="visual">
             {canRender?<SceneBoundary fallback={fallback} onFailure={failure}>
@@ -207,7 +227,7 @@ function App(){
           <span className="counter"><b>{pad(index+1)}</b> / {slides.length}</span>
           {slide.region&&<nav className="scene-steps" aria-label="Сцени області">{regionSteps.map(i=><button key={slides[i].id} aria-label={slides[i].short} title={slides[i].short} aria-current={index===i?'step':undefined} onClick={()=>go(i)}/>)}</nav>}
           <span className="keyboard">← → &nbsp; PageUp / PageDown</span>
-          <button className="next" onClick={()=>step(1)} disabled={index===slides.length-1}>{index===0?'Почати виступ':index===slides.length-1?'Фінальний слайд':slide.kind==='demo'?'Відкрити інструмент':photos.length&&!skippedGallery?'Показати фото':'Далі'} {index===slides.length-1?<ArrowDownRight size={17}/>:<ArrowRight size={17}/>}</button>
+          <button className="next" onClick={()=>step(1)} disabled={index===slides.length-1}>{index===0?'Почати виступ':index===slides.length-1?'Фінальний слайд':slide.kind==='demo'?'Відкрити інструмент':slide.kind==='shared'?'До фіналу':photos.length&&!skippedGallery?'Показати фото':'Далі'} {index===slides.length-1?<ArrowDownRight size={17}/>:<ArrowRight size={17}/>}</button>
         </div>
       </footer>
       {demoOpen&&<MapDemo onNext={()=>step(1)} onClose={closeDemo}/>}
