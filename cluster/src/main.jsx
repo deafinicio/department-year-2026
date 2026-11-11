@@ -92,7 +92,7 @@ function App(){
   const [paused,setPaused]=useState(false);
   const [fullscreen,setFullscreen]=useState(false);
   const [demoOpen,setDemoOpen]=useState(false);
-  const demoSession=useRef(null);
+  const demoSession=useRef(null),demoAdvance=useRef(null);
   const osReduced=useReducedMotion(),animate=!osReduced&&!paused;
   const panel=useRef(null),dialogRef=useRef(null),stageRef=useRef(null),beforeFinale=useRef(null);
   const [photoChoice,setPhotoChoice]=useState({id:null,index:0});
@@ -142,7 +142,7 @@ function App(){
     });
   },[]);
   const step=useCallback(direction=>{
-    if(demoSession.current){closeDemo();if(direction>0)go(i=>i+1);return;}
+    if(demoSession.current){if(direction>0)demoAdvance.current?.();else closeDemo();return;}
     if(direction>0&&slide.kind==='demo'){openDemo();return;}
     const dialog=dialogRef.current;
     if(dialog?.open){
@@ -237,7 +237,7 @@ function App(){
           <button className="next" onClick={()=>step(1)} disabled={index===slides.length-1}>{index===0?'Почати виступ':index===slides.length-1?'Фінальний слайд':slide.kind==='demo'?'Відкрити інструмент':slide.kind==='shared'?'До фіналу':photos.length&&!skippedGallery?'Показати фото':'Далі'} {index===slides.length-1?<ArrowDownRight size={17}/>:<ArrowRight size={17}/>}</button>
         </div>
       </footer>
-      {demoOpen&&<MapDemo onNext={()=>step(1)} onClose={closeDemo}/>}
+      {demoOpen&&<MapDemo advanceRef={demoAdvance} onNext={()=>{closeDemo();go(i=>i+1);}} onClose={closeDemo}/>}
       <PhotoDialog dialogRef={dialogRef} photos={photos} selected={selected} onStep={step} onDismiss={dismissPhoto}/>
       <p className="sr-only" aria-live="polite">Слайд {index+1} з {slides.length}. {slide.title}.</p>
     </div>
