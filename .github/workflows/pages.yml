@@ -44,6 +44,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Set up Node for the cluster presentation
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: cluster/package-lock.json
+      - name: Build the cluster presentation
+        working-directory: cluster
+        run: |
+          npm ci
+          npm test
+          npm run build
+          mkdir -p ../site/cluster
+          cp -a dist/. ../site/cluster/
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload static website
