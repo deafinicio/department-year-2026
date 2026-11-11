@@ -5,7 +5,7 @@ import {Bloom,EffectComposer,Vignette} from '@react-three/postprocessing';
 import * as THREE from 'three';
 import {regions} from './content.js';
 
-const centers=[-3.5,0,3.5];
+import {centers,fov,framing} from './camera.js';
 const dark=new THREE.Color('#0b1526');
 const accent=(color,level)=>new THREE.Color(color).multiplyScalar(level);
 const curvePoints=(points)=>new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));
@@ -14,26 +14,13 @@ const cablePaths=[
   curvePoints([[0,.54,.18],[0,.53,1.62],[0,.52,2.14],[3.5,.52,2.14],[3.5,.53,1.62],[3.5,.54,.18]]),
 ];
 
-function Camera({regionIndex,phase,animate,compact}){
+function Camera({regionIndex,phase,animate}){
   const camera=useThree(s=>s.camera),size=useThree(s=>s.size);
   const target=useRef(new THREE.Vector3(0,.65,0));
-  const position=useMemo(()=>new THREE.Vector3(),[]),look=useMemo(()=>new THREE.Vector3(),[]);
+  const pose=useMemo(()=>framing(regionIndex,phase,size.width/Math.max(1,size.height)),[regionIndex,phase,size.width,size.height]);
   useFrame((_,dt)=>{
-    const region=regionIndex>=0&&regionIndex<3;
-    const x=region?centers[regionIndex]:0;
-    const narrow=size.width/Math.max(1,size.height)<1.1;
-    const distance=(narrow?1.29:1)*(compact?1.05:1);
-    if(region){
-      const poses=[[4.4,5.4,8.3],[3.4,4.1,7.0],[4.5,4.5,6.5],[2.9,5.6,7.3]];
-      const [a,b,c]=poses[phase];
-      position.set(x+a*distance,b*distance,c*distance);
-      look.set(x,.93,0);
-    }else{
-      position.set((regionIndex===3?3.4:6.8)*distance,(regionIndex===3?8.3:9.6)*distance,12.9*distance);
-      look.set(0,.5,0);
-    }
     const t=animate?1-Math.exp(-Math.min(dt,.06)*3.8):1;
-    camera.position.lerp(position,t);target.current.lerp(look,t);camera.lookAt(target.current);
+    camera.position.lerp(pose.position,t);target.current.lerp(pose.look,t);camera.lookAt(target.current);
   });
   return null;
 }
@@ -113,10 +100,10 @@ function Module({i,regionIndex,phase,animate,quality}){
   </group>;
 }
 
-function Deck({regionIndex,phase,animate,quality,compact}){
+function Deck({regionIndex,phase,animate,quality}){
   return <>
     <color attach="background" args={['#0b1526']}/>
-    <fog attach="fog" args={['#0b1526',18,34]}/>
+    <fog attach="fog" args={['#0b1526',28,85]}/>
     <hemisphereLight args={['#cfebff','#33465e',1.05]}/>
     <directionalLight position={[-5,9,6]} color="#fff2d7" intensity={3.15} castShadow shadow-mapSize-width={quality==='high'?1536:1024} shadow-mapSize-height={quality==='high'?1536:1024} shadow-camera-left={-9} shadow-camera-right={9} shadow-camera-top={8} shadow-camera-bottom={-8} shadow-normalBias={.035} shadow-bias={-.0002} shadow-radius={3}/>
     <directionalLight position={[6,4,-5]} color="#8dccf7" intensity={2.2}/>
@@ -133,7 +120,7 @@ function Deck({regionIndex,phase,animate,quality,compact}){
     <gridHelper position={[0,.525,0]} args={[10.8,36,'#496e8a','#2e4c66']} scale={[1,1,.431]}/>
     {cablePaths.map((path,i)=><Route key={i} path={path} color={regions[i+1].color} enabled={regionIndex>i} animate={animate}/>)}
     {regions.map((r,i)=><Module key={r.id} i={i} regionIndex={regionIndex} phase={phase} animate={animate} quality={quality}/>)}
-    <Camera regionIndex={regionIndex} phase={phase} animate={animate} compact={compact}/>
+    <Camera regionIndex={regionIndex} phase={phase} animate={animate}/>
     {quality==='high'&&<EffectComposer multisampling={0} enableNormalPass={false}><Bloom intensity={.56} luminanceThreshold={1.06} luminanceSmoothing={.24} mipmapBlur/><Vignette offset={.23} darkness={.44}/></EffectComposer>}
   </>;
 }
@@ -149,7 +136,7 @@ function ContextWatch({onFailure}){
 }
 
 export default function Platform({onFailure,...props}){
-  return <Canvas frameloop={props.animate?'always':'demand'} shadows="percentage" camera={{position:[7,10,14],fov:41,near:.1,far:90}}
+  return <Canvas frameloop={props.animate?'always':'demand'} shadows="percentage" camera={{position:[7,10,14],fov,near:.1,far:110}}
     dpr={props.quality==='high'?[1,1.5]:1}
     gl={{antialias:true,alpha:false,powerPreference:'high-performance',stencil:false}}
     onCreated={({gl})=>{gl.toneMapping=THREE.ACESFilmicToneMapping;gl.toneMappingExposure=1.1;}}

@@ -65,7 +65,7 @@ function App(){
   const [fullscreen,setFullscreen]=useState(false);
   const osReduced=useReducedMotion(),animate=!osReduced&&!paused;
   const panel=useRef(null);
-  const slide=slides[index],active=slide.regionIndex,compact=['results','shared'].includes(slide.kind);
+  const slide=slides[index],active=slide.regionIndex;
   const go=useCallback((value)=>setIndex(current=>Math.max(0,Math.min(slides.length-1,typeof value==='function'?value(current):value))),[]);
   const failure=useCallback(()=>setCanRender(false),[]);
   const toggleFullscreen=useCallback(async()=>{
@@ -115,7 +115,7 @@ function App(){
           <div className="stage-top"><span><ScanLine size={15}/> ПЛАТФОРМА КЛАСТЕРУ</span><span>{canRender?'3D':'ІЗОМЕТРІЯ'}</span></div>
           <div className="visual">
             {canRender?<SceneBoundary fallback={fallback} onFailure={failure}>
-              <Suspense fallback={fallback}><Platform onFailure={failure} regionIndex={active} phase={slide.phase} animate={animate} quality={quality} compact={compact}/></Suspense>
+              <Suspense fallback={fallback}><Platform onFailure={failure} regionIndex={active} phase={slide.phase} animate={animate} quality={quality}/></Suspense>
             </SceneBoundary>:fallback}
           </div>
           <div className="stage-bottom">
