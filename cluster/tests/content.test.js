@@ -19,7 +19,7 @@ test('regional tables retain all rows and figures are only provided where source
   assert.deepEqual(regions.map(r=>r.results.length),[3,8,4]);
   assert.deepEqual(regions.map(r=>r.achievements.length),[3,4,3]);
   assert.deepEqual(regions.map(r=>r.plans.length),[5,5,6]);
-  assert.deepEqual(regions.map(r=>r.metrics.map(m=>m[0])),[['4 797','56,85 %','43,15 %'],['10 522','731'],[]]);
+  assert.deepEqual(regions.map(r=>r.metrics.map(m=>m[0])),[['4 797','56,85 %','43,15 %'],['10 552','731'],[]]);
   assert(regions.flatMap(r=>r.results).every(row=>row.length===3&&row[0]&&row[1]));
 });
 
@@ -27,4 +27,11 @@ test('shared discussion table has the three original prompts and five rows',()=>
   assert.deepEqual(sharedColumns,['Що завадило?','Як ми реагували?','Що змінили в роботі?']);
   assert.equal(sharedRows.length,5);
   assert(sharedRows.every(row=>row.length===sharedColumns.length&&row.every(v=>typeof v==='string')));
+});
+
+test('Sumy audience groups sum to the supplied total and percentages are rounded correctly',()=>{
+  const sumy=regions.find(r=>r.id==='sumy'),total=Number(sumy.metrics[0][0].replaceAll(' ',''));
+  assert.deepEqual(sumy.audience.map(a=>a.count),[5494,5058]);
+  assert.equal(sumy.audience.reduce((sum,a)=>sum+a.count,0),total);
+  for(const a of sumy.audience)assert.equal(Number((a.count/total*100).toFixed(1)),a.percent);
 });
